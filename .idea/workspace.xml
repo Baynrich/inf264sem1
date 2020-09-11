@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7966b9ed-e682-48e1-b8dc-05f0acced093" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/decision.tree.py" beforeDir="false" afterPath="$PROJECT_DIR$/decision.tree.py" afterDir="false" />
     </list>
@@ -83,7 +81,7 @@
       <option name="presentableId" value="Default" />
       <updated>1599478745213</updated>
       <workItem from="1599478748424" duration="11716000" />
-      <workItem from="1599810347076" duration="2488000" />
+      <workItem from="1599810347076" duration="4353000" />
     </task>
     <servers />
   </component>
