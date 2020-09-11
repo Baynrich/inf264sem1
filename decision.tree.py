@@ -13,12 +13,10 @@ class Tree:
     def createTreeEntropy(self, X, y):
         # if all labels are the same, set variable and return
         if (len(set(y)) <= 1):
-            print("add feature homogenous set")
             self.feature = y[0]
 
         # if all features are the same, set variable to most common label and return
         elif X.count(X[0]) == len(X):
-            print("add feature majority")
             self.feature = max(set(y), key=y.count)
 
         else:
@@ -67,11 +65,12 @@ class Tree:
             self.child1 = Tree().createTreeEntropy(child1X, child1y)
             self.child2 = Tree().createTreeEntropy(child2X, child2y)
 
+
     def predict(self, x):
         if hasattr(self, 'feature'):
             return self.feature
         else:
-            return self.child1 if (x[self.splitter] >= self.splitBy) else self.child2
+            return self.child1.predict(x) if (x[self.splitter] >= self.splitBy) else self.child2.predict(x)
 
 
 X = [[3.6216, 8.6661, -2.8073, -0.44699],
@@ -83,4 +82,5 @@ y = [1, 1, 0, 0, 0]
 
 tree1 = Tree()
 tree1.createTreeEntropy(X, y)
-#print(tree1.predict([4.6765, -3.3895, 3.4896, 1.4771]))
+print(tree1.child1.__dict__)
+print(tree1.predict([4.6765, -3.3895, 3.4896, 1.4771]))
