@@ -28,18 +28,29 @@ class Tree:
                 xCol = xColDash-1
                 splitBy = np.average([xRow[xCol] for xRow in X])
                 splitBys.append(splitBy)
-                aboveOrEqual = [xRow for xRow in X if xRow[xCol] >= splitBy]
-                below = [xRow for xRow in X if xRow[xCol] < splitBy]
-                entAboveOrEqual = self.getEnt(aboveOrEqual)
-                entBelow = self.getEnt(below)
-                conditionalEnt = (len(aboveOrEqual)/len(y))*entAboveOrEqual + (len(below)/len(y))*entBelow;
+                curXCol = [xRow[xCol] for xRow in X]
+
+                ##HER BLIR DUMT
+                yAboveOrEqual = []
+                yBelow = []
+                for i in range(len(y)):
+                    if(curXCol[i] >= splitBy):
+                        yAboveOrEqual.append(y[i])
+                    else:
+                        yBelow.append(y[i])
+
+
+                entAboveOrEqual = self.getEnt(yAboveOrEqual)
+                entBelow = self.getEnt(yBelow)
+                print(entAboveOrEqual)
+                print(entBelow)
+                conditionalEnt = (len(yAboveOrEqual)/len(y))*entAboveOrEqual + (len(yBelow)/len(y))*entBelow;
                 IGs.append(curEnt-conditionalEnt)
             #Save index of column used to split matrix, EG. column with highest information gain
             self.splitter = IGs.index(max(IGs))
             self.splitBy = splitBys[IGs.index(max(IGs))]
 
-            print(self.splitter)
-            print(self.splitBy)
+
 
             #Create new matrices as subtrees
             child1X = []
@@ -55,7 +66,6 @@ class Tree:
                 if (X[xRowIndex][self.splitter] < splitBy):
                     child2X.append(X[xRowIndex])
                     child2y.append(y[xRowIndex])
-
             #recurse
 
             #self.child1 = Tree().createTreeEntropy(child1X, child1y)
