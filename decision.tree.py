@@ -10,7 +10,36 @@ class Tree:
             return 0
         return (-1) * ((probZero * np.log2(probZero)) + ((1 - probZero) * np.log2(1 - probZero)))
 
-    def createTreeEntropy(self, X, y):
+    def splitByEntropy(self, X, y):
+        # Full group entropy
+        curEnt = self.getEnt(y)
+        splitBys = []
+        IGs = []
+        # Calculate all information gain values
+        for xCol in range(len(X[0])):
+            splitBy = np.average([xRow[xCol] for xRow in X])
+            splitBys.append(splitBy)
+            curXCol = [xRow[xCol] for xRow in X]
+
+            ##HER BLIR DUMT
+            yAboveOrEqual = []
+            yBelow = []
+            for i in range(len(y)):
+                if (curXCol[i] >= splitBy):
+                    yAboveOrEqual.append(y[i])
+                else:
+                    yBelow.append(y[i])
+
+            entAboveOrEqual = self.getEnt(yAboveOrEqual)
+            entBelow = self.getEnt(yBelow)
+
+            conditionalEnt = (len(yAboveOrEqual) / len(y)) * entAboveOrEqual + (len(yBelow) / len(y)) * entBelow;
+            IGs.append(curEnt - conditionalEnt)
+        # Save index of column used to split matrix, EG. column with highest information gain
+        self.splitter = IGs.index(max(IGs))
+        self.splitBy = splitBys[IGs.index(max(IGs))]
+
+    def createTree(self, X, y, impurity_measure="entropy"):
         # if all labels are the same, set variable and return
         if (len(set(y)) <= 1):
             self.feature = y[0]
@@ -20,34 +49,9 @@ class Tree:
             self.feature = max(set(y), key=y.count)
 
         else:
-            # Full group entropy
-            curEnt = self.getEnt(y)
-            splitBys = []
-            IGs = []
-            # Calculate all information gain values
-            for xCol in range(len(X[0])):
-                splitBy = np.average([xRow[xCol] for xRow in X])
-                splitBys.append(splitBy)
-                curXCol = [xRow[xCol] for xRow in X]
-
-                ##HER BLIR DUMT
-                yAboveOrEqual = []
-                yBelow = []
-                for i in range(len(y)):
-                    if (curXCol[i] >= splitBy):
-                        yAboveOrEqual.append(y[i])
-                    else:
-                        yBelow.append(y[i])
-
-                entAboveOrEqual = self.getEnt(yAboveOrEqual)
-                entBelow = self.getEnt(yBelow)
-
-                conditionalEnt = (len(yAboveOrEqual) / len(y)) * entAboveOrEqual + (len(yBelow) / len(y)) * entBelow;
-                IGs.append(curEnt - conditionalEnt)
-            # Save index of column used to split matrix, EG. column with highest information gain
-            self.splitter = IGs.index(max(IGs))
-            self.splitBy = splitBys[IGs.index(max(IGs))]
-
+            if impurity_measure == "entropy":
+                self.splitByEntropy(X, y)
+                
             # Create new matrices as subtrees
             child1X = []
             child1y = []
@@ -63,9 +67,9 @@ class Tree:
 
             # recurse
             self.child1 = Tree()
-            self.child1.createTreeEntropy(child1X, child1y)
+            self.child1.createTree(child1X, child1y)
             self.child2 = Tree()
-            self.child2.createTreeEntropy(child2X, child2y)
+            self.child2.createTree(child2X, child2y)
 
 
     def predict(self, x):
@@ -83,6 +87,5 @@ X = [[3.6216, 8.6661, -2.8073, -0.44699],
 y = [1, 1, 0, 0, 0]
 
 tree1 = Tree()
-tree1.createTreeEntropy(X, y)
-#print(tree1.child1.__dict__)
+tree1.createTree(X, y)
 print(tree1.predict([4.6765, -3.3895, 3.4896, 1.4771]))
