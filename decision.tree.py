@@ -62,8 +62,10 @@ class Tree:
                     child2y.append(y[xRowIndex])
 
             # recurse
-            self.child1 = Tree().createTreeEntropy(child1X, child1y)
-            self.child2 = Tree().createTreeEntropy(child2X, child2y)
+            self.child1 = Tree()
+            self.child1.createTreeEntropy(child1X, child1y)
+            self.child2 = Tree()
+            self.child2.createTreeEntropy(child2X, child2y)
 
 
     def predict(self, x):
@@ -82,5 +84,5 @@ y = [1, 1, 0, 0, 0]
 
 tree1 = Tree()
 tree1.createTreeEntropy(X, y)
-print(tree1.child1.__dict__)
+#print(tree1.child1.__dict__)
 print(tree1.predict([4.6765, -3.3895, 3.4896, 1.4771]))
