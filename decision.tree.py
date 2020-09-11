@@ -4,6 +4,17 @@ import functools as ft
 
 class Tree:
 
+    def splitMatrixByAverage(self, X, y,xCol, splitBy):
+        curXCol = [xRow[xCol] for xRow in X]
+        yAboveOrEqual = []
+        yBelow = []
+        for i in range(len(y)):
+            if (curXCol[i] >= splitBy):
+                yAboveOrEqual.append(y[i])
+            else:
+                yBelow.append(y[i])
+        return [yAboveOrEqual, yBelow]
+
     def getEnt(self, list):
         probZero = len([val for val in list if val == 0]) / len(list)
         if probZero == 1 or probZero == 0:
@@ -19,19 +30,10 @@ class Tree:
         for xCol in range(len(X[0])):
             splitBy = np.average([xRow[xCol] for xRow in X])
             splitBys.append(splitBy)
-            curXCol = [xRow[xCol] for xRow in X]
-
-            yAboveOrEqual = []
-            yBelow = []
-            for i in range(len(y)):
-                if (curXCol[i] >= splitBy):
-                    yAboveOrEqual.append(y[i])
-                else:
-                    yBelow.append(y[i])
-
-            entAboveOrEqual = self.getEnt(yAboveOrEqual)
-            entBelow = self.getEnt(yBelow)
-            conditionalEnt = (len(yAboveOrEqual) / len(y)) * entAboveOrEqual + (len(yBelow) / len(y)) * entBelow;
+            ySplit = self.splitMatrixByAverage(X, y, xCol, splitBy)
+            entAboveOrEqual = self.getEnt(ySplit[0])
+            entBelow = self.getEnt(ySplit[1])
+            conditionalEnt = (len(ySplit[0]) / len(y)) * entAboveOrEqual + (len(ySplit[1]) / len(y)) * entBelow;
             IGs.append(curEnt - conditionalEnt)
         # Save index of column used to split matrix, EG. column with highest information gain
         self.splitter = IGs.index(max(IGs))
@@ -47,15 +49,8 @@ class Tree:
         for xCol in range(len(X[0])):
             splitBy = np.average([xRow[xCol] for xRow in X])
             splitBys.append(splitBy)
-            curXCol = [xRow[xCol] for xRow in X]
-            yAboveOrEqual = []
-            yBelow = []
-            for i in range(len(y)):
-                if(curXCol[i] >= splitBy):
-                    yAboveOrEqual.append(y[i])
-                else:
-                    yBelow.append(y[i])
-            weightedGINI = (len(yAboveOrEqual)/len(y))*self.getGINI(yAboveOrEqual) + (len(yBelow)/len(y))* self.getGINI(yBelow)
+            ySplit = self.splitMatrixByAverage(X, y, xCol, splitBy)
+            weightedGINI = (len(ySplit[0])/len(y))*self.getGINI(ySplit[0]) + (len(ySplit[1])/len(y))* self.getGINI(ySplit[1])
             GINIs.append(weightedGINI)
         self.splitter = GINIs.index(min(GINIs))
         self.splitBy = splitBys[GINIs.index(max(GINIs))]
