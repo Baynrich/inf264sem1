@@ -21,7 +21,6 @@ class Tree:
             splitBys.append(splitBy)
             curXCol = [xRow[xCol] for xRow in X]
 
-            ##HER BLIR DUMT
             yAboveOrEqual = []
             yBelow = []
             for i in range(len(y)):
@@ -32,12 +31,34 @@ class Tree:
 
             entAboveOrEqual = self.getEnt(yAboveOrEqual)
             entBelow = self.getEnt(yBelow)
-
             conditionalEnt = (len(yAboveOrEqual) / len(y)) * entAboveOrEqual + (len(yBelow) / len(y)) * entBelow;
             IGs.append(curEnt - conditionalEnt)
         # Save index of column used to split matrix, EG. column with highest information gain
         self.splitter = IGs.index(max(IGs))
         self.splitBy = splitBys[IGs.index(max(IGs))]
+
+    def getGINI(self, list):
+        probZero = len([val for val in list if val == 0]) / len(list)
+        return 1 - (probZero**2 + (1-probZero)**2)
+
+    def splitByGini(self, X, y):
+        splitBys = []
+        GINIs = []
+        for xCol in range(len(X[0])):
+            splitBy = np.average([xRow[xCol] for xRow in X])
+            splitBys.append(splitBy)
+            curXCol = [xRow[xCol] for xRow in X]
+            yAboveOrEqual = []
+            yBelow = []
+            for i in range(len(y)):
+                if(curXCol[i] >= splitBy):
+                    yAboveOrEqual.append(y[i])
+                else:
+                    yBelow.append(y[i])
+            weightedGINI = (len(yAboveOrEqual)/len(y))*self.getGINI(yAboveOrEqual) + (len(yBelow)/len(y))* self.getGINI(yBelow)
+            GINIs.append(weightedGINI)
+        self.splitter = GINIs.index(min(GINIs))
+        self.splitBy = splitBys[GINIs.index(max(GINIs))]
 
     def createTree(self, X, y, impurity_measure="entropy"):
         # if all labels are the same, set variable and return
@@ -51,7 +72,9 @@ class Tree:
         else:
             if impurity_measure == "entropy":
                 self.splitByEntropy(X, y)
-                
+            elif impurity_measure == "gini":
+                self.splitByGini(X, y)
+
             # Create new matrices as subtrees
             child1X = []
             child1y = []
@@ -87,5 +110,5 @@ X = [[3.6216, 8.6661, -2.8073, -0.44699],
 y = [1, 1, 0, 0, 0]
 
 tree1 = Tree()
-tree1.createTree(X, y)
+tree1.createTree(X, y, impurity_measure="gini")
 print(tree1.predict([4.6765, -3.3895, 3.4896, 1.4771]))

@@ -70,6 +70,18 @@
       <method v="2" />
     </configuration>
   </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -81,7 +93,7 @@
       <option name="presentableId" value="Default" />
       <updated>1599478745213</updated>
       <workItem from="1599478748424" duration="11716000" />
-      <workItem from="1599810347076" duration="7129000" />
+      <workItem from="1599810347076" duration="9963000" />
     </task>
     <servers />
   </component>
