@@ -113,7 +113,7 @@ class Tree:
         return hasattr(self, "feature") and self.feature is not None
 
     def predict(self, x):
-        if hasattr(self, 'feature'):
+        if self.has_feature():
             return self.feature
         else:
             return self.child1.predict(x) if (x[self.splitter] >= self.splitBy) else self.child2.predict(x)
@@ -158,15 +158,14 @@ def random_shuffle_pair(a, b):
 
 
 def split(X):
-    train, prune, val, test = X[:int(len(X) * 0.6)], X[int(len(X) * 0.6): int(len(X) * 0.7)], X[int(
-        len(X) * 0.7): int(len(X) * 0.8)], X[int(len(X) * 0.8):]
-    return train, prune, val, test
+    train, prune, test = X[:int(len(X) * 0.7)], X[int(len(X) * 0.7): int(len(X) * 0.85)], X[int(len(X) * 0.85):]
+    return train, prune, test
 
 
 a, b = format_data()
 X, y = random_shuffle_pair(a, b)
-x_train, x_prune, x_val, x_test = split(X)
-y_train, y_prune, y_val, y_test = split(y)
+x_train, x_prune, x_test = split(X)
+y_train, y_prune, y_test = split(y)
 tree1 = Tree()
 tree2 = Tree()
 tree1.createTree(x_train, y_train, "entropy")
