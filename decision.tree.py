@@ -53,12 +53,12 @@ class Tree:
             splitBys.append(splitBy)
             ySplit = self.splitMatrixByAverage(X, y, xCol, splitBy)
             weightedGINI = (len(ySplit[0]) / len(y)) * self.getGINI(ySplit[0]) + (
-                        len(ySplit[1]) / len(y)) * self.getGINI(ySplit[1])
+                    len(ySplit[1]) / len(y)) * self.getGINI(ySplit[1])
             GINIs.append(weightedGINI)
         self.splitter = GINIs.index(min(GINIs))
         self.splitBy = splitBys[GINIs.index(max(GINIs))]
 
-    def createTree(self, X, y, impurity_measure="entropy"):
+    def createTree(self, X, y, impurity_measure="entropy", prune=False, x_prune=None, y_prune=None):
         # if all labels are the same, set variable and return
         if (len(set(y)) <= 1):
             self.feature = y[0]
@@ -88,15 +88,45 @@ class Tree:
 
             # recurse
             self.child1 = Tree()
-            self.child1.createTree(child1X, child1y, impurity_measure)
+            self.child1.createTree(child1X, child1y, impurity_measure, prune, x_prune, y_prune)
             self.child2 = Tree()
-            self.child2.createTree(child2X, child2y, impurity_measure)
+            self.child2.createTree(child2X, child2y, impurity_measure, prune, x_prune, y_prune)
+
+            if (prune):
+                self.prune(self.child1, y, x_prune, y_prune)
+                self.prune(self.child2, y, x_prune, y_prune)
+
+    def prune(self, child, y, x_prune, y_prune):
+        if child.has_feature():
+            return
+        acc = self.accuracy(x_prune, y_prune)
+        if y.count(0) > y.count(1):
+            label = 0
+        else:
+            label = 1
+        child.feature = label
+        new_acc = self.accuracy(x_prune, y_prune)
+        if new_acc < acc:
+            child.feature = None
+
+    def has_feature(self):
+        return hasattr(self, "feature") and self.feature is not None
 
     def predict(self, x):
         if hasattr(self, 'feature'):
             return self.feature
         else:
             return self.child1.predict(x) if (x[self.splitter] >= self.splitBy) else self.child2.predict(x)
+
+    def accuracy(self, x_test, y_test):
+        x_result = []
+        for x in x_test:
+            x_result.append(self.predict(x))
+        avg = 0
+        for i in range(len(x_result)):
+            if x_result[i] == y_test[i]:
+                avg += 1
+        return avg / len(x_result)
 
 
 #
@@ -127,10 +157,19 @@ def random_shuffle_pair(a, b):
     return a, b
 
 
+def split(X):
+    train, prune, val, test = X[:int(len(X) * 0.6)], X[int(len(X) * 0.6): int(len(X) * 0.7)], X[int(
+        len(X) * 0.7): int(len(X) * 0.8)], X[int(len(X) * 0.8):]
+    return train, prune, val, test
+
+
 a, b = format_data()
 X, y = random_shuffle_pair(a, b)
-
+x_train, x_prune, x_val, x_test = split(X)
+y_train, y_prune, y_val, y_test = split(y)
 tree1 = Tree()
-tree1.createTree(X[:-1], y[:-1], "entropy")
-print(tree1.predict(X[-1]))
-print(y[-1])
+tree2 = Tree()
+tree1.createTree(x_train, y_train, "entropy")
+tree2.createTree(x_train, y_train, "entropy", prune=True, x_prune=x_prune, y_prune=y_prune)
+print(tree1.accuracy(x_test, y_test))
+print(tree2.accuracy(x_test, y_test))
