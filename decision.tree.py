@@ -1,10 +1,12 @@
 import numpy as np
 import functools as ft
+import pandas as pd
+import random
 
 
 class Tree:
 
-    def splitMatrixByAverage(self, X, y,xCol, splitBy):
+    def splitMatrixByAverage(self, X, y, xCol, splitBy):
         curXCol = [xRow[xCol] for xRow in X]
         yAboveOrEqual = []
         yBelow = []
@@ -41,7 +43,7 @@ class Tree:
 
     def getGINI(self, list):
         probZero = len([val for val in list if val == 0]) / len(list)
-        return 1 - (probZero**2 + (1-probZero)**2)
+        return 1 - (probZero ** 2 - (1 - probZero) ** 2)
 
     def splitByGini(self, X, y):
         splitBys = []
@@ -50,7 +52,8 @@ class Tree:
             splitBy = np.average([xRow[xCol] for xRow in X])
             splitBys.append(splitBy)
             ySplit = self.splitMatrixByAverage(X, y, xCol, splitBy)
-            weightedGINI = (len(ySplit[0])/len(y))*self.getGINI(ySplit[0]) + (len(ySplit[1])/len(y))* self.getGINI(ySplit[1])
+            weightedGINI = (len(ySplit[0]) / len(y)) * self.getGINI(ySplit[0]) + (
+                        len(ySplit[1]) / len(y)) * self.getGINI(ySplit[1])
             GINIs.append(weightedGINI)
         self.splitter = GINIs.index(min(GINIs))
         self.splitBy = splitBys[GINIs.index(max(GINIs))]
@@ -85,10 +88,9 @@ class Tree:
 
             # recurse
             self.child1 = Tree()
-            self.child1.createTree(child1X, child1y)
+            self.child1.createTree(child1X, child1y, impurity_measure)
             self.child2 = Tree()
-            self.child2.createTree(child2X, child2y)
-
+            self.child2.createTree(child2X, child2y, impurity_measure)
 
     def predict(self, x):
         if hasattr(self, 'feature'):
@@ -97,13 +99,38 @@ class Tree:
             return self.child1.predict(x) if (x[self.splitter] >= self.splitBy) else self.child2.predict(x)
 
 
-X = [[3.6216, 8.6661, -2.8073, -0.44699],
-     [4.5459, 8.1674, -2.4586, -1.4621],
-     [3.866, -2.6383, 1.9242, 0.10645],
-     [3.4566, 9.5228, -4.0112, -3.5944],
-     [0.32924, -4.4552, 4.5718, -0.9888]]
-y = [1, 1, 0, 0, 0]
+#
+# X = [[3.6216, 8.6661, -2.8073, -0.44699],
+#      [4.5459, 8.1674, -2.4586, -1.4621],
+#      [3.866, -2.6383, 1.9242, 0.10645],
+#      [3.4566, 9.5228, -4.0112, -3.5944],
+#      [0.32924, -4.4552, 4.5718, -0.9888]]
+# y = [1, 1, 0, 0, 0]
+
+
+def format_data(filename='data_banknote_authentication.txt'):
+    df = pd.read_csv('data_banknote_authentication.txt')
+    y_df = df['Label']
+    X_df = df[['A', 'B', 'C', 'D']]
+    X = []
+    y = []
+    for i in range(len(X_df)):
+        X.append(X_df.iloc[i].to_numpy().tolist())
+        y.append(y_df.iloc[i])
+    return X, y
+
+
+def random_shuffle_pair(a, b):
+    c = list(zip(a, b))
+    random.shuffle(c)
+    a, b = zip(*c)
+    return a, b
+
+
+a, b = format_data()
+X, y = random_shuffle_pair(a, b)
 
 tree1 = Tree()
-tree1.createTree(X, y, impurity_measure="gini")
-print(tree1.predict([4.6765, -3.3895, 3.4896, 1.4771]))
+tree1.createTree(X[:-1], y[:-1], "entropy")
+print(tree1.predict(X[-1]))
+print(y[-1])
