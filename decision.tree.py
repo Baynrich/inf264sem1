@@ -1,5 +1,4 @@
 import numpy as np
-import functools as ft
 import pandas as pd
 import random
 import time
@@ -62,8 +61,10 @@ class Tree:
         self.splitBy = splitBys[GINIs.index(max(GINIs))]
 
     def createTree(self, X, y, impurity_measure="entropy", prune=False, x_prune=None, y_prune=None):
+        if len(X) == 0 or len(y) == 0:
+            return
         # if all labels are the same, set variable and return
-        if (len(set(y)) <= 1):
+        if (len(set(y)) == 1):
             self.feature = y[0]
 
         # if all features are the same, set variable to most common label and return
@@ -132,15 +133,6 @@ class Tree:
         return avg / len(x_result)
 
 
-#
-# X = [[3.6216, 8.6661, -2.8073, -0.44699],
-#      [4.5459, 8.1674, -2.4586, -1.4621],
-#      [3.866, -2.6383, 1.9242, 0.10645],
-#      [3.4566, 9.5228, -4.0112, -3.5944],
-#      [0.32924, -4.4552, 4.5718, -0.9888]]
-# y = [1, 1, 0, 0, 0]
-
-
 def format_data(filename='data_banknote_authentication.txt'):
     df = pd.read_csv('data_banknote_authentication.txt')
     y_df = df['Label']
@@ -187,11 +179,11 @@ x_train, x_prune, x_val, x_test = split(X)
 y_train, y_prune, y_val, y_test = split(y)
 tree1, tree2, tree3, tree4 = Tree(), Tree(), Tree(), Tree()
 tree1.createTree(x_train, y_train, "entropy")
-tree2.createTree(x_train, y_train, "entropy", prune=True, x_prune=x_prune, y_prune=y_prune)
+# tree2.createTree(x_train, y_train, "entropy", prune=True, x_prune=x_prune, y_prune=y_prune)
 # tree3.createTree(x_train, y_train, "gini")
-# tree4.createTree(x_train, y_train, "gini", prune=True, x_prune=x_prune, y_prune=y_prune)
+tree4.createTree(x_train, y_train, "gini", prune=True, x_prune=x_prune, y_prune=y_prune)
 print("Only entropy: ", tree1.accuracy(x_val, y_val))
-print("Entropy and pruning: ", tree2.accuracy(x_val, y_val))
+# print("Entropy and pruning: ", tree2.accuracy(x_val, y_val))
 # print("Only gini: ", tree3.accuracy(x_val, y_val))
-# print("Gini and pruning: ", tree4.accuracy(x_val, y_val))
+print("Gini and pruning: ", tree4.accuracy(x_val, y_val))
 print(test_tree("entropy", 50, x_train, y_train, x_val, y_val, pruning=True, x_prune=x_prune, y_prune=y_prune))
