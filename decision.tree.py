@@ -2,6 +2,7 @@ import numpy as np
 import functools as ft
 import pandas as pd
 import random
+import time
 
 
 class Tree:
@@ -42,8 +43,10 @@ class Tree:
         self.splitBy = splitBys[IGs.index(max(IGs))]
 
     def getGINI(self, list):
+        if not list:
+            return 1
         probZero = len([val for val in list if val == 0]) / len(list)
-        return 1 - (probZero ** 2 - (1 - probZero) ** 2)
+        return 1 - (probZero ** 2 + (1 - probZero) ** 2)
 
     def splitByGini(self, X, y):
         splitBys = []
@@ -158,17 +161,37 @@ def random_shuffle_pair(a, b):
 
 
 def split(X):
-    train, prune, test = X[:int(len(X) * 0.7)], X[int(len(X) * 0.7): int(len(X) * 0.85)], X[int(len(X) * 0.85):]
-    return train, prune, test
+    train, prune, val,  test = X[:int(len(X) * 0.7)], X[int(len(X) * 0.7): int(len(X) * 0.8)],\
+                               X[int(len(X) * 0.8): int(len(X) * 0.9)], X[int(len(X) * 0.9):]
+    return train, prune, val, test
+
+
+def test_tree(impurity_measure,  nr_of_tests, X, y, x_test, y_test, pruning=False, x_prune=None, y_prune=None):
+    avg_time = 0
+    avg_score = 0
+    for i in range(nr_of_tests):
+        tree = Tree()
+        start = time.time()
+        tree.createTree(X, y, impurity_measure, pruning, x_prune, y_prune)
+        avg_score += tree.accuracy(x_test, y_test)
+        avg_time += time.time() - start
+    avg_time /= nr_of_tests
+    avg_score /= nr_of_tests
+    return avg_score, avg_time
 
 
 a, b = format_data()
+random.seed(58)
 X, y = random_shuffle_pair(a, b)
-x_train, x_prune, x_test = split(X)
-y_train, y_prune, y_test = split(y)
-tree1 = Tree()
-tree2 = Tree()
+x_train, x_prune, x_val, x_test = split(X)
+y_train, y_prune, y_val, y_test = split(y)
+tree1, tree2, tree3, tree4 = Tree(), Tree(), Tree(), Tree()
 tree1.createTree(x_train, y_train, "entropy")
 tree2.createTree(x_train, y_train, "entropy", prune=True, x_prune=x_prune, y_prune=y_prune)
-print(tree1.accuracy(x_test, y_test))
-print(tree2.accuracy(x_test, y_test))
+# tree3.createTree(x_train, y_train, "gini")
+# tree4.createTree(x_train, y_train, "gini", prune=True, x_prune=x_prune, y_prune=y_prune)
+print("Only entropy: ", tree1.accuracy(x_val, y_val))
+print("Entropy and pruning: ", tree2.accuracy(x_val, y_val))
+# print("Only gini: ", tree3.accuracy(x_val, y_val))
+# print("Gini and pruning: ", tree4.accuracy(x_val, y_val))
+print(test_tree("entropy", 50, x_train, y_train, x_val, y_val, pruning=True, x_prune=x_prune, y_prune=y_prune))
