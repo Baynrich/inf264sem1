@@ -1,8 +1,6 @@
 import pandas as pd
 import random
-import time
 import tree as my_tree
-from sklearn import tree as sk_tree
 
 
 def format_data(filename='data_banknote_authentication.txt'):
@@ -30,39 +28,34 @@ def split(X):
     return train, prune, val, test
 
 
-def test_tree(impurity_measure,  nr_of_tests, X, y, pruning=False):
-    avg_time = 0
-    avg_score = 0
-    for i in range(nr_of_tests):
-        tree = my_tree.Tree()
-        X, y = random_shuffle_pair(X, y)
-        x_train, x_prune, x_val, x_test = split(X)
-        y_train, y_prune, y_val, y_test = split(y)
-        x_test = x_test + x_val
-        y_test = y_test + y_val
-        start = time.time()
-        tree.createTree(x_train, y_train, impurity_measure, pruning, x_prune, y_prune)
-        avg_score += tree.accuracy(x_test, y_test)
-        avg_time += time.time() - start
-    avg_time /= nr_of_tests
-    avg_score /= nr_of_tests
-    return avg_score, avg_time
+def train_and_test_get_best_tree(X,y):
+    x_train, x_prune, x_val, x_test = split(X)
+    y_train, y_prune, y_val, y_test = split(y)
+    tree1, tree2, tree3, tree4 = my_tree.Tree(), my_tree.Tree(), my_tree.Tree(), my_tree.Tree()
+    tree1.createTree(x_train, y_train)
+    tree2.createTree(x_train, y_train, impurity_measure="gini")
+    tree3.createTree(x_train, y_train, prune=True, x_prune=x_prune, y_prune=y_prune)
+    tree4.createTree(x_train, y_train, impurity_measure="gini", prune=True, x_prune=x_prune, y_prune=y_prune)
+    entropy = tree1.accuracy(x_val, y_val)
+    gini = tree2.accuracy(x_val, y_val)
+    entropy_pruned = tree3.accuracy(x_val, y_val)
+    gini_pruned = tree4.accuracy(x_val, y_val)
+    trees = [tree1, tree2, tree3, tree4]
+    tree_accuracies = [entropy, gini, entropy_pruned, gini_pruned]
+    tree_names = ["Entropy", "Gini", "Entropy with pruning", "Gini with pruning"]
+    for i in range(4):
+        if tree_accuracies[i] == max(tree_accuracies):
+            print(tree_names[i], " has the highest accuracy with : " , tree_accuracies[i])
+            print(trees[i].accuracy(x_test, y_test), " is the accuracy of this model with the testing set.")
+            return trees[i]
 
 
 a, b = format_data()
-# random.seed(58)
+# random.seed(46)           ##If you want to use a fixed seed
 X, y = random_shuffle_pair(a, b)
-print("Entropy and pruning, accuracy and time: ", test_tree("entropy", 50, X, y, pruning=True))
-print("Entropy, accuracy and time: ", test_tree("entropy", 50, X, y))
-print("Gini and pruning, accuracy and time: ", test_tree("gini", 50, X, y, pruning=True))
-print("Gini, accuracy and time: ", test_tree("gini", 50, X, y))
-# x_train, x_prune, x_val, x_test = split(X)
-# y_train, y_prune, y_val, y_test = split(y)
-# x_train += x_prune
-# y_train += x_prune
-# clf = tree.DecisionTreeClassifier()
-# clf = clf.fit(x_train, y_train)
-# print(clf.predict(x_val))
-# print(y_val)
+train_and_test_get_best_tree(X, y)
+
+
+
 
 
