@@ -58,7 +58,7 @@ class Tree:
                     len(ySplit[1]) / len(y)) * self.getGINI(ySplit[1])
             GINIs.append(weightedGINI)
         self.splitter = GINIs.index(min(GINIs))
-        self.splitBy = splitBys[GINIs.index(max(GINIs))]
+        self.splitBy = splitBys[GINIs.index(min(GINIs))]
 
     def createTree(self, X, y, impurity_measure="entropy", prune=False, x_prune=None, y_prune=None):
         if len(X) == 0 or len(y) == 0:
@@ -179,11 +179,11 @@ x_train, x_prune, x_val, x_test = split(X)
 y_train, y_prune, y_val, y_test = split(y)
 tree1, tree2, tree3, tree4 = Tree(), Tree(), Tree(), Tree()
 tree1.createTree(x_train, y_train, "entropy")
-# tree2.createTree(x_train, y_train, "entropy", prune=True, x_prune=x_prune, y_prune=y_prune)
-# tree3.createTree(x_train, y_train, "gini")
+tree2.createTree(x_train, y_train, "entropy", prune=True, x_prune=x_prune, y_prune=y_prune)
+tree3.createTree(x_train, y_train, "gini")
 tree4.createTree(x_train, y_train, "gini", prune=True, x_prune=x_prune, y_prune=y_prune)
 print("Only entropy: ", tree1.accuracy(x_val, y_val))
-# print("Entropy and pruning: ", tree2.accuracy(x_val, y_val))
-# print("Only gini: ", tree3.accuracy(x_val, y_val))
+print("Entropy and pruning: ", tree2.accuracy(x_val, y_val))
+print("Only gini: ", tree3.accuracy(x_val, y_val))
 print("Gini and pruning: ", tree4.accuracy(x_val, y_val))
 print(test_tree("entropy", 50, x_train, y_train, x_val, y_val, pruning=True, x_prune=x_prune, y_prune=y_prune))
