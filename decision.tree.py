@@ -53,7 +53,7 @@ def train_and_test_get_best_tree(X,y):
 a, b = format_data()
 # random.seed(46)           ##If you want to use a fixed seed
 X, y = random_shuffle_pair(a, b)
-train_and_test_get_best_tree(X, y)
+best_tree = train_and_test_get_best_tree(X, y)
 
 
 
